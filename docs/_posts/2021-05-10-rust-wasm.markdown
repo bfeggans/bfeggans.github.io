@@ -1,0 +1,25 @@
+---
+layout: post
+title:  "wyd WebAssembly?"
+date:   2021-05-10 13:09:00 -0400
+categories: rust wasm javascript
+---
+I was in a meeting at work a few months ago. We were discussing our technology team's focus and plans for the upcoming year. The usual suspects came up - tech debt, devops, metrics and reports. But then a coworker mentioned Blazor. After he explained what it was, I started Googling. Blazor is a library that lets you write client (and server) code in C# by compiling down to WebAssembly. We've all heard of WebAssembly. But, like, is anyone really doing anything with it? What are the *real* use cases? And if Wasm can give you speed and safety, why are we still using JavaScript?
+
+I learn best by zooming out. So before getting to Wasm, I'm gonna focus on JavaScript.
+
+JavaScript was created for designers to add behavior to web pages. The plan was for some light programming to help add some funk to static webpages. Because of this plan for "light programming", it was built as an interpreted language. Interpreted languages are read, parsed, and executed line by line. They are easy to understand and implement (if you know what you're doing) and they provide immediate feedback. Sounds perfect!
+
+Well, we all know what happens next. Everyone goes buckwild with JS. Tons of code is written to give web pages more application-like feels. Code moves from the server to the browser. User interfaces get more and more complex. And JS wasn't built for this. Many desktop applications were written using compiled languages - could that work for JS in the browser, too?
+
+Compilers introduce more complexity, but they produce bytecode that executes much faster than interpreters and interpreted code. It's faster because of global optimizations (shared machine code for repeated actions, etc.). Faster execution time is the main advantage of compiled code over interpreted. But the compilation process is slow - so your website takes a long time to load. Ew.
+
+If we want immediate execution while also getting the good stuff from compiled languages, let's just figure out a way to smush these two things together. Which is kinda what browser developers did. They employed a strategy called Just-In-Time compilation. JIT for short. JIT compilation runs JavaScript through an interpreter. While that's happening, there's something watching this process - the profiler. The profiler keeps track of pieces of code that are being called more often and sends those out to be optimized. "Optimized" means creating compiled bits of code that execute much faster than their interpreted counterparts. The next time the code is called, the optimized bits are used instead of the interpreted bits. Best of both worlds. Kinda...
+
+This works really well for most of the web. But it's still slower than strictly compiled code. So, if we want to play GTA V in the browser, we can't. Client-side media compression, physics simulations - too complex to run in the browser. Is there a way to port desktop applications to the web without an entire rewrite? Not really. Wait, what if I just want to write browser code in something other than JavaScript (not talking about you TypeScript). Can't. Unless...wasm!
+
+This is how WebAssembly fits in. Wasm is a compiler target. That means it can be written in many languages and compiled down to. Video game code, desktop apps, and performant compression algorithms can all be compiled to wasm. Wasm's load time is **faster** than JS because the files are binary, and, thus, more compact. Parsing JavaScript is slow, so wasm isn't parsed. It's decoded which is **faster**. No need for a profiler or the memory that the profiler needs, so execution is **faster**. The browser's JS engine spends no time on optimizations since this done during the compilation process - yep, **faster**.
+
+It's recommended that wasm should be used alongside JS - for tasks that require faster processing and more control. But if it's so much faster, why shouldn't we use it for *almost* everything? I did some Redditing and Googling to see what other people thought about this. Some think wasm is a way to get systems programmers access to the browser. Others think wasm isn't really necessary - that plain, old JavaScript is good enough. Probably right, but if we can save time, any amount of it, shouldn't we do that? Even if the execution was the exact same in terms of performance, isn't the smaller download worth it? 
+
+I *do* think that JS and wasm deserve to live alongside one another. Importantly, wasm can't talk to the DOM today. So, JS is extremely necessary for that task. But, with the complexity of some web apps today, there's plenty of room for wasm to step in and take a load of off JS. Giving wasm the harder tasks allows JS to return its roots - adding funk to the web.
