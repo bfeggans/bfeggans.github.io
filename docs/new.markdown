@@ -1,6 +1,8 @@
+---
 layout: page
 title: "New Test"
 permalink: /new/test/
+---
 
 ## Does this work??
 
