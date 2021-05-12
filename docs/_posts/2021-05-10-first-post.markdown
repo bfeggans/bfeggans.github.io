@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "sup, world?"
-date:   2021-05-10 22:48:11 -0400
+date:   2021-05-10 21:00:00 -0400
 categories: jekyll update
 ---
 First post. Let's get it!

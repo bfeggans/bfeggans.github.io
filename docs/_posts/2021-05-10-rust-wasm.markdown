@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "wyd WebAssembly?"
-date:   2021-05-10 13:09:00 -0400
+date:   2021-05-10 23:00:00 -0400
 categories: rust wasm javascript
 ---
 I was in a meeting at work a few months ago. We were discussing our technology team's focus and plans for the upcoming year. The usual suspects came up - tech debt, devops, metrics and reports. But then a coworker mentioned Blazor. After he explained what it was, I started Googling. Blazor is a library that lets you write client (and server) code in C# by compiling down to WebAssembly. We've all heard of WebAssembly. But, like, is anyone really doing anything with it? What are the *real* use cases? And if Wasm can give you speed and safety, why are we still using JavaScript?

@@ -1,0 +1,15 @@
+---
+layout: post
+title:  "node-gyp and python...npm install dependencies :("
+date:   2021-05-11 21:00:00 -0400
+categories: node node-gyp javascript
+---
+I had to clone a repository to a fresh Windows VM today. It's a .NET Core project, so I went through the paces of restoring Nuget packages and building the service. I'm impatient, so as soon as the service built I fired off a `dotnet run`. Got an error. No biggie - the asset locator couldn't find the webpack assets. I know this one - let's go `npm install` the frontend code so I can get it bundled.
+
+Nope.
+
+`node-gyp` can't be installed. Okay. Wait, the `node-gyp` installation is failing because Python is missing? Did I type the right thing? Let's try this again (when in doubt just run it again). Same error. Cool. So, what is `node-gyp`, why do I need it, and why do I need Python to download JavaScript packages for a frontend build process???
+
+According to its readme, "`node-gyp` is a cross-platform command-line tool written in Node.js for compiling native addon modules for Node.js." Addon modules are dynamically-linked shared objects written in C++ that allow for execution in the Node.js. Sounds cool. Add a binding and pull in C++ via a require. Kinda similar to the JS-wasm relationship. Where's Python come in? Well, `node-gyp` is just a wrapper around a Python library, gyp.
+
+Sounds like this is more of issue on Windows because it doesn't come with Python. Solution was straightforward - install Python and add it to the PATH.
