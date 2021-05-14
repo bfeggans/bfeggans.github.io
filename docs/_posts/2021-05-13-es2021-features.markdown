@@ -1,0 +1,177 @@
+---
+layout: post
+title:  "ES2021 goodies"
+date:   2021-05-13 21:00:00 -0400
+categories: javascript ecmascript es es2021
+---
+
+### String.prototype.replaceAll
+First up is the replaceAll method. This one's just a little sugar - the functionality is already available via `str.split(' ').join('-')` or through a global regex with `str.replace(/\s/g, '-')`. Nice to have, but not really necessary. What about performance? Well, it's faster than replacing with the regex and pretty similar to split/join. I ran some tests against varying lengths of lorem ipsum text to compare.
+
+```
+// 5 paragraphs
+Total Elapsed (replaceAll):
+0.07999999797903001
+Total Elapsed (replace):
+0.2099999983329326
+Total Elapsed (split/join):
+0.12000000424450263
+
+// 20 paragraphs
+Total Elapsed (replaceAll):
+0.295000005280599
+Total Elapsed (replace):
+0.3349999969941564
+Total Elapsed (split/join):
+0.2900000035879202
+
+// 100 paragraphs
+Total Elapsed (replaceAll):
+1.1650000014924444
+Total Elapsed (replace):
+2.3299999957089312
+Total Elapsed (split/join):
+2.209999998740386
+```
+I take back what I said about this method's necessity. It's not often that I'll be doing a replace in a large text string, but `replaceAll` looks like the move if I do.
+
+### Optional Chaining
+Been waiting for this one for a while. Really straightforward, but cleans up the code a lot. Traditionally in JavaScript, you'd see lengthy `&&` chains to get down to a value. The `&&`s prevent the `TypeError: Cannot read property X of null at...` while attempting to grab a value without a parent.
+
+```
+const obj = {
+    first: 1,
+    second: {
+        third: 3,
+        fourth: {
+            fifth: null,
+            sixth: 6,
+        }
+    }
+};
+
+// && chain
+const andSixth = obj.second && obj.second.fourth && obj.second.fourth.sixth;
+const andSeventh = obj.second && obj.second.fourth && obj.second.fourth.seventh;
+
+console.log(andSixth);
+// 6
+console.log(andSeventh);
+// undefined
+
+// optional chain
+const sixthVal = obj?.second?.fourth?.sixth;
+const seventhVal = obj?.second?.fourth?.seventh;
+
+console.log(sixthVal);
+// 6
+console.log(seventhVal);
+// undefined
+```
+I mean, it's minor. But that optional chain is much more readable.
+
+### Logical Assignment Operators
+Code golf, anyone? These seem nice, but I'm not sure how often I'll use them. They aren't super readable. Just like the non-assignment operators, these thingys evaluate from left to right. That gives the ability to shortcircuit assignments. Let's see how they look.
+```
+// For all of the following, lets begin with...
+let foo = 2;
+let bar = 0;
+```
+#### Logical AND (&&=)
+```
+foo &&= 1;
+console.log(foo);
+// 1
+
+bar &&= 1;
+console.log(foo);
+// 0
+```
+#### Logical OR (||=)
+```
+foo ||= 1;
+console.log(foo);
+// 2
+
+bar ||= 1;
+console.log(foo);
+// 1
+```
+#### Logical nullish (??=)
+```
+foo ??= 1;
+console.log(foo);
+// 2
+
+bar ??= 1;
+console.log(foo);
+// 0 -> this one was a little confusing bc I thought the 0 would coerce to null...it didn't
+```
+
+### Promise.any && AggregateError
+`Promise.any` is a race between promises. For the first promise that fulfills, `Promise.any` will return a promise that resolves to that fulfilled value. 
+```
+const p1 = new Promise((res) => setTimeout(res, 1001, 'hare'));
+const p2 = new Promise((res) => setTimeout(res, 1000, 'turtle'));
+
+const promises = [p1, p2];
+
+Promise.any(promises).then((value) => console.log(value));
+// turtle
+```
+`AggregateError` is returned from `Promise.any` in the error case, but can be used anywhere. It is a new subclass of `Error` that will aggregate multiple failures into a single `Error`. I think this type could also be handy when returning multiple validation errors from validators. You can actually throw an `AggregateError` with any type in the array - it doesn't have to be an `Error`.
+```
+try {
+  throw new AggregateError([
+    new Error('bad guy'),
+    new Error('another one'),
+    { error: 'not good' },
+    'call for help'
+  ], 'Validation failed: check errors property');
+} catch (err) {
+  console.log(err.message);
+  // Validation failed: check errors property
+
+  console.log(err.errors);
+  // [Error: 'bad guy', Error: 'another one', {error: 'not good'}, 'call for help']
+}
+```
+
+### Other
+#### Nullish Coalescing Operator
+The nullish coalescing operator is one that we will probably see used often. I already see it in TypeScript projects. It's a little quirky in comparison to traditional JavaScript because there's no coercion. It *only* treats `null` and `undefined` as nullish values.
+```
+const foo = 'heyyo' ?? 1;
+console.log(foo);
+// "heyyo"
+
+const bar = 0 ?? 1;
+console.log(bar);
+// 0
+
+const baz = '' ?? 0;
+console.log(baz);
+// ""
+
+const nullCoalesced = null ?? 2;
+console.log(nullCoalesced);
+// 2
+
+const undefinedCoalesced = null ?? 3;
+console.log(undefinedCoalesced);
+3
+```
+
+#### Numeric Literal Separators
+What does one million look like written in JavaScript? `1_000_000`! Weird, but I can get used to this. The separators are for visual purposes only - `1_000 === 1000 // true`.
+
+#### FinalizationRegistry && WeakRefs
+I don't really understand the use case for this one. With the `FinalizationRegistry`, you can register a callback that will be invoked when an object is garbage collected. JS is great because we don't have to worry about the GC (until it bites), so I'm not totally sure why I'd use this. TODO: Find a real world use case...
+
+As for `WeakRef`, MDN says to avoid. Done.
+
+#### Private methods/accessors
+Within a class, you can now mark methods and fields as private with a leading hashtag. This is the case for static fields as well as instnace fields.
+
+#### Intl.ListFormat && Intl.DateTimeFormat
+A couple localization features. These seem more appropriate for a library than the spec and language, but what do I know? For me, it's good enough to know that they exist.
